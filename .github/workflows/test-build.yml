@@ -1,0 +1,41 @@
+name: Test & Build Package
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  test-build:
+    name: Test & Build package
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go environment
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.3"
+
+      - name: Tidy dependencies
+        working-directory: src
+        run: |
+          go mod download
+          go mod tidy
+
+      - name: Test package
+        working-directory: src
+        run: |
+          go test ./...
+
+      - name: Build package
+        working-directory: src
+        run: |
+          go build -o dist/ -ldflags "-s -w"
